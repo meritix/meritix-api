@@ -8,3 +8,18 @@ Content-Type: application/json
   "email": "abhi@meritix.com",
   "password": "Password123"
 }
+
+### Login User
+
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "abhi@meritix.com",
+  "password": "Password123"
+}
+
+### Profile
+
+GET http://localhost:3000/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWJoaUBtZXJpdGl4LmNvbSIsImlhdCI6MTc4NTA1MDUxMCwiZXhwIjoxNzg1MTM2OTEwfQ.f9O4Z1jmx8iQ-LVsGjnPAAI3n6dOwmuEi33EQNgg2Ag
