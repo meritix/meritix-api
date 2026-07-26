@@ -1,4 +1,19 @@
-### Register User
+############################################################
+# MERITIX API TEST FILE
+############################################################
+
+############################################################
+# LOGIN
+############################################################
+
+# After login, copy ONLY the access_token
+# and paste it in the @token line below.
+
+@token = yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWJoaUBtZXJpdGl4LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTA2OTE0NiwiZXhwIjoxNzg1MTU1NTQ2fQ.mkhiImMaHI2361B05d_4XgInjv4IQ-_W0VnlFwwxeP4
+
+############################################################
+### REGISTER
+############################################################
 
 POST http://localhost:3000/auth/register
 Content-Type: application/json
@@ -9,7 +24,9 @@ Content-Type: application/json
   "password": "Password123"
 }
 
-### Login User
+############################################################
+### LOGIN
+############################################################
 
 POST http://localhost:3000/auth/login
 Content-Type: application/json
@@ -19,7 +36,69 @@ Content-Type: application/json
   "password": "Password123"
 }
 
-### Profile
+############################################################
+### PROFILE
+############################################################
 
 GET http://localhost:3000/auth/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWJoaUBtZXJpdGl4LmNvbSIsImlhdCI6MTc4NTA1MDUxMCwiZXhwIjoxNzg1MTM2OTEwfQ.f9O4Z1jmx8iQ-LVsGjnPAAI3n6dOwmuEi33EQNgg2Ag
+Authorization: Bearer {{token}}
+
+############################################################
+### ADMIN ROUTE
+############################################################
+
+GET http://localhost:3000/auth/admin
+Authorization: Bearer {{token}}
+
+############################################################
+### GET ALL USERS
+############################################################
+
+GET http://localhost:3000/users
+Authorization: Bearer {{token}}
+
+############################################################
+### CURRENT USER
+############################################################
+
+GET http://localhost:3000/users/me
+Authorization: Bearer {{token}}
+
+############################################################
+### GET USER BY ID
+############################################################
+
+GET http://localhost:3000/users/1
+Authorization: Bearer {{token}}
+
+############################################################
+### CHANGE USER ROLE
+############################################################
+
+PATCH http://localhost:3000/users/1/role
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+############################################################
+### CREATE SECOND USER
+############################################################
+
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Rahul",
+  "email": "rahul@meritix.com",
+  "password": "Password123"
+}
+
+############################################################
+### DELETE USER
+############################################################
+
+DELETE http://localhost:3000/users/2
+Authorization: Bearer {{token}}

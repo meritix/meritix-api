@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -29,12 +29,13 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Save new user
+    // Save user
     const newUser = await this.prisma.user.create({
       data: {
         name: registerDto.name,
         email: registerDto.email,
         password: hashedPassword,
+        role: registerDto.role ?? 'STUDENT',
       },
     });
 
@@ -44,13 +45,14 @@ export class AuthService {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
+        role: newUser.role,
         createdAt: newUser.createdAt,
       },
     };
   }
 
   async login(loginDto: LoginDto) {
-    // Find user by email
+    // Find user
     const user = await this.prisma.user.findUnique({
       where: {
         email: loginDto.email,
@@ -59,34 +61,35 @@ export class AuthService {
 
     if (!user) {
       return {
-        message: 'User not found.',
+        message: 'Invalid email or password.',
       };
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(
+    // Compare password
+    const passwordMatched = await bcrypt.compare(
       loginDto.password,
       user.password,
     );
 
-    if (!isPasswordValid) {
+    if (!passwordMatched) {
       return {
-        message: 'Invalid password.',
+        message: 'Invalid email or password.',
       };
     }
 
-    // JWT generation will be added in the next lesson
+    // Create JWT payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
 
-   const payload = {
-  sub: user.id,
-  email: user.email,
-};
+    // Generate JWT
+    const access_token = await this.jwtService.signAsync(payload);
 
-const accessToken = this.jwtService.sign(payload);
-
-return {
-  message: 'Login successful.',
-  access_token: accessToken,
-};
+    return {
+      message: 'Login successful.',
+      access_token,
+    };
   }
 }
