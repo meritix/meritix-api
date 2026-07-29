@@ -8,66 +8,47 @@ datasource db {
 }
 
 enum Role {
+  ADMIN
   STUDENT
   TEACHER
-  RECRUITER
   SCHOOL
-  COLLEGE
-  PARENT
-  COMPANY
-  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionType {
+  SINGLE
+  MULTIPLE
+  TRUE_FALSE
+}
+
+enum TestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(STUDENT)
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  role     Role    @default(STUDENT)
+  isActive Boolean @default(true)
+
+  tests    Test[]    @relation("CreatedTests")
+  attempts Attempt[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  studentProfile StudentProfile?
-
+  @@index([role])
+  @@index([isActive])
   @@map("users")
-}
-
-model StudentProfile {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @unique
-  meritixId       String    @unique
-  admissionNumber String?
-  firstName       String
-  middleName      String?
-  lastName        String
-  gender          String?
-  dob             DateTime?
-  phone           String?
-  alternatePhone  String?
-  bloodGroup      String?
-  nationality     String?
-  religion        String?
-  category        String?
-  aadhaar         String?
-  photo           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("student_profiles")
-}
-
-model AcademicYear {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  startDate DateTime
-  endDate   DateTime
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("academic_years")
 }
 
 model Board {
@@ -75,69 +56,225 @@ model Board {
   code        String  @unique
   name        String  @unique
   description String?
-  website     String?
-  country     String  @default("India")
   isActive    Boolean @default(true)
+
+  subjects Subject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  schools School[]
-
+  @@index([isActive])
   @@map("boards")
 }
 
 model Subject {
   id          Int     @id @default(autoincrement())
-  code        String  @unique
-  name        String  @unique
+  boardId     Int
+  code        String
+  name        String
   shortName   String?
   description String?
   category    String?
   isActive    Boolean @default(true)
 
+  board     Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  chapters  Chapter[]
+  questions Question[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([boardId, code])
+  @@unique([boardId, name])
+  @@index([boardId])
+  @@index([isActive])
   @@map("subjects")
 }
 
-model School {
-  id Int @id @default(autoincrement())
+model Chapter {
+  id          Int     @id @default(autoincrement())
+  subjectId   Int
+  code        String
+  name        String
+  description String?
+  sequence    Int     @default(1)
+  isActive    Boolean @default(true)
 
-  code String @unique
-  name String
-
-  boardId Int
-  board   Board @relation(fields: [boardId], references: [id], onDelete: Restrict)
-
-  udiseCode     String? @unique
-  affiliationNo String?
-
-  principalName String?
-
-  email   String?
-  phone   String?
-  website String?
-
-  address String?
-  city    String?
-  state   String?
-  country String  @default("India")
-  pincode String?
-
-  latitude  Decimal? @db.Decimal(10, 7)
-  longitude Decimal? @db.Decimal(10, 7)
-
-  establishedYear Int?
-
-  isActive Boolean @default(true)
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics    Topic[]
+  questions Question[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([boardId])
-  @@index([city])
-  @@index([state])
-  @@map("schools")
+  @@unique([subjectId, code])
+  @@unique([subjectId, name])
+  @@index([subjectId])
+  @@index([sequence])
+  @@index([isActive])
+  @@map("chapters")
+}
+
+model Topic {
+  id          Int     @id @default(autoincrement())
+  chapterId   Int
+  code        String
+  name        String
+  description String?
+  sequence    Int     @default(1)
+  isActive    Boolean @default(true)
+
+  chapter   Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([chapterId, code])
+  @@unique([chapterId, name])
+  @@index([chapterId])
+  @@index([sequence])
+  @@index([isActive])
+  @@map("topics")
+}
+
+model Question {
+  id                   Int          @id @default(autoincrement())
+  subjectId            Int
+  chapterId            Int
+  topicId              Int?
+  code                 String
+  questionText         String       @db.Text
+  explanation          String?      @db.Text
+  questionType         QuestionType @default(SINGLE)
+  difficulty           Difficulty   @default(MEDIUM)
+  marks                Float        @default(1)
+  negativeMarks        Float        @default(0)
+  estimatedTimeSeconds Int?
+  imageUrl             String?
+  isActive             Boolean      @default(true)
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  topic   Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  options       QuestionOption[]
+  testQuestions TestQuestion[]
+  answers       AttemptAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([chapterId, code])
+  @@index([subjectId])
+  @@index([chapterId])
+  @@index([topicId])
+  @@index([questionType])
+  @@index([difficulty])
+  @@index([isActive])
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         Int     @id @default(autoincrement())
+  questionId Int
+  optionText String  @db.Text
+  imageUrl   String?
+  isCorrect  Boolean @default(false)
+  sequence   Int
+
+  question        Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswers AttemptAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([questionId, sequence])
+  @@index([questionId])
+  @@index([isCorrect])
+  @@map("question_options")
+}
+
+model Test {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?    @db.Text
+  duration    Int
+  totalMarks  Float
+  status      TestStatus @default(DRAFT)
+  createdById Int
+
+  createdBy User           @relation("CreatedTests", fields: [createdById], references: [id], onDelete: Restrict)
+  questions TestQuestion[]
+  attempts  Attempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([status])
+  @@map("tests")
+}
+
+model TestQuestion {
+  id            Int    @id @default(autoincrement())
+  testId        Int
+  questionId    Int
+  sequence      Int
+  marks         Float?
+  negativeMarks Float?
+
+  test     Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([testId, questionId])
+  @@unique([testId, sequence])
+  @@index([testId])
+  @@index([questionId])
+  @@map("test_questions")
+}
+
+model Attempt {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  testId        Int
+  obtainedMarks Float     @default(0)
+  totalMarks    Float
+  percentage    Float     @default(0)
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  test    Test            @relation(fields: [testId], references: [id], onDelete: Cascade)
+  answers AttemptAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([testId])
+  @@index([submittedAt])
+  @@map("attempts")
+}
+
+model AttemptAnswer {
+  id               Int     @id @default(autoincrement())
+  attemptId        Int
+  questionId       Int
+  selectedOptionId Int?
+  isCorrect        Boolean @default(false)
+  marksAwarded     Float   @default(0)
+
+  attempt        Attempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption QuestionOption? @relation(fields: [selectedOptionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@index([selectedOptionId])
+  @@map("attempt_answers")
 }

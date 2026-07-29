@@ -13,7 +13,6 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: {
         email: registerDto.email,
@@ -26,10 +25,8 @@ export class AuthService {
       };
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Save user
     const newUser = await this.prisma.user.create({
       data: {
         name: registerDto.name,
@@ -52,24 +49,31 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    // Find user
     const user = await this.prisma.user.findUnique({
       where: {
         email: loginDto.email,
       },
     });
 
+    console.log('================================');
+    console.log('Login Email    :', loginDto.email);
+    console.log('User Found     :', user ? 'YES' : 'NO');
+
     if (!user) {
+      console.log('================================');
+
       return {
         message: 'Invalid email or password.',
       };
     }
 
-    // Compare password
     const passwordMatched = await bcrypt.compare(
       loginDto.password,
       user.password,
     );
+
+    console.log('Password Match :', passwordMatched);
+    console.log('================================');
 
     if (!passwordMatched) {
       return {
@@ -77,14 +81,12 @@ export class AuthService {
       };
     }
 
-    // Create JWT payload
     const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
 
-    // Generate JWT
     const access_token = await this.jwtService.signAsync(payload);
 
     return {

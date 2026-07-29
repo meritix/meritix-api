@@ -17,14 +17,13 @@ import { UpdateAcademicYearDto } from './dto/update-academic-year.dto';
 @Controller('academic-years')
 @UseGuards(JwtAuthGuard)
 export class AcademicYearController {
-  constructor(private readonly academicYearService: AcademicYearService) {}
+  constructor(
+    private readonly academicYearService: AcademicYearService,
+  ) {}
 
   @Post()
-  create(
-    @Body()
-    createAcademicYearDto: CreateAcademicYearDto,
-  ) {
-    return this.academicYearService.create(createAcademicYearDto);
+  create(@Body() dto: CreateAcademicYearDto) {
+    return this.academicYearService.create(dto);
   }
 
   @Get()
@@ -42,18 +41,22 @@ export class AcademicYearController {
     return this.academicYearService.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body()
-    updateAcademicYearDto: UpdateAcademicYearDto,
-  ) {
-    return this.academicYearService.update(id, updateAcademicYearDto);
-  }
-
   @Patch(':id/activate')
   activate(@Param('id', ParseIntPipe) id: number) {
     return this.academicYearService.activate(id);
+  }
+
+  @Patch(':id/deactivate')
+  deactivate(@Param('id', ParseIntPipe) id: number) {
+    return this.academicYearService.deactivate(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAcademicYearDto,
+  ) {
+    return this.academicYearService.update(id, dto);
   }
 
   @Delete(':id')

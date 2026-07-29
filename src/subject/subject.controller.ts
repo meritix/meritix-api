@@ -29,11 +29,6 @@ export class SubjectController {
     return this.subjectService.findAll();
   }
 
-  @Get('active')
-  findActive() {
-    return this.subjectService.findActive();
-  }
-
   @Get('code/:code')
   findByCode(@Param('code') code: string) {
     return this.subjectService.findByCode(code);
@@ -44,11 +39,6 @@ export class SubjectController {
     return this.subjectService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateSubjectDto) {
-    return this.subjectService.update(id, dto);
-  }
-
   @Patch(':id/activate')
   activate(@Param('id', ParseIntPipe) id: number) {
     return this.subjectService.activate(id);
@@ -57,6 +47,14 @@ export class SubjectController {
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseIntPipe) id: number) {
     return this.subjectService.deactivate(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateSubjectDto,
+  ) {
+    return this.subjectService.update(id, dto);
   }
 
   @Delete(':id')

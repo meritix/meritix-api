@@ -1,0 +1,43 @@
+############################################################
+### MERITIX AUTH API
+############################################################
+
+@baseUrl = http://localhost:3000
+
+############################################################
+### Check Auth API
+############################################################
+
+GET {{baseUrl}}/auth
+
+###
+
+############################################################
+### Register Admin (Run ONLY once)
+############################################################
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Administrator",
+  "email": "admin@meritix.com",
+  "password": "Password123",
+  "role": "ADMIN"
+}
+
+###
+
+############################################################
+### Login
+############################################################
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Password123"
+}
+
+###

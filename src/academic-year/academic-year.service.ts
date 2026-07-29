@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
 import { UpdateAcademicYearDto } from './dto/update-academic-year.dto';
@@ -12,47 +13,43 @@ import { UpdateAcademicYearDto } from './dto/update-academic-year.dto';
 export class AcademicYearService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createAcademicYearDto: CreateAcademicYearDto) {
-    const existingAcademicYear = await this.prisma.academicYear.findUnique({
+  async create(dto: CreateAcademicYearDto) {
+    const name = dto.name.trim();
+    const startDate = new Date(dto.startDate);
+    const endDate = new Date(dto.endDate);
+
+    this.validateDateRange(startDate, endDate);
+
+    const duplicate = await this.prisma.academicYear.findFirst({
       where: {
-        name: createAcademicYearDto.name,
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
       },
+      select: { id: true },
     });
 
-    if (existingAcademicYear) {
+    if (duplicate) {
       throw new ConflictException(
-        `Academic year ${createAcademicYearDto.name} already exists.`,
+        'Academic year name already exists.',
       );
     }
 
-    const startDate = new Date(createAcademicYearDto.startDate);
-
-    const endDate = new Date(createAcademicYearDto.endDate);
-
-    if (startDate >= endDate) {
-      throw new BadRequestException(
-        'The academic year end date must be after the start date.',
-      );
-    }
-
-    return this.prisma.$transaction(async (transaction) => {
-      if (createAcademicYearDto.isActive) {
-        await transaction.academicYear.updateMany({
-          where: {
-            isActive: true,
-          },
-          data: {
-            isActive: false,
-          },
+    return this.prisma.$transaction(async (tx) => {
+      if (dto.isActive === true) {
+        await tx.academicYear.updateMany({
+          where: { isActive: true },
+          data: { isActive: false },
         });
       }
 
-      return transaction.academicYear.create({
+      return tx.academicYear.create({
         data: {
-          name: createAcademicYearDto.name,
+          name,
           startDate,
           endDate,
-          isActive: createAcademicYearDto.isActive ?? false,
+          isActive: dto.isActive ?? false,
         },
       });
     });
@@ -60,82 +57,88 @@ export class AcademicYearService {
 
   async findAll() {
     return this.prisma.academicYear.findMany({
-      orderBy: {
-        startDate: 'desc',
-      },
+      orderBy: [
+        { startDate: 'desc' },
+        { name: 'asc' },
+      ],
     });
-  }
-
-  async findActive() {
-    const academicYear = await this.prisma.academicYear.findFirst({
-      where: {
-        isActive: true,
-      },
-    });
-
-    if (!academicYear) {
-      throw new NotFoundException('No active academic year was found.');
-    }
-
-    return academicYear;
   }
 
   async findOne(id: number) {
-    const academicYear = await this.prisma.academicYear.findUnique({
-      where: {
-        id,
-      },
-    });
+    const academicYear =
+      await this.prisma.academicYear.findUnique({
+        where: { id },
+      });
 
     if (!academicYear) {
-      throw new NotFoundException(`Academic year with ID ${id} was not found.`);
+      throw new NotFoundException('Academic year not found.');
     }
 
     return academicYear;
   }
 
-  async update(id: number, updateAcademicYearDto: UpdateAcademicYearDto) {
-    const existingAcademicYear = await this.findOne(id);
-
-    if (
-      updateAcademicYearDto.name &&
-      updateAcademicYearDto.name !== existingAcademicYear.name
-    ) {
-      const duplicate = await this.prisma.academicYear.findUnique({
-        where: {
-          name: updateAcademicYearDto.name,
-        },
+  async findActive() {
+    const academicYear =
+      await this.prisma.academicYear.findFirst({
+        where: { isActive: true },
       });
 
-      if (duplicate) {
-        throw new ConflictException(
-          `Academic year ${updateAcademicYearDto.name} already exists.`,
-        );
-      }
-    }
-
-    const startDate = updateAcademicYearDto.startDate
-      ? new Date(updateAcademicYearDto.startDate)
-      : existingAcademicYear.startDate;
-
-    const endDate = updateAcademicYearDto.endDate
-      ? new Date(updateAcademicYearDto.endDate)
-      : existingAcademicYear.endDate;
-
-    if (startDate >= endDate) {
-      throw new BadRequestException(
-        'The academic year end date must be after the start date.',
+    if (!academicYear) {
+      throw new NotFoundException(
+        'No active academic year found.',
       );
     }
 
-    return this.prisma.$transaction(async (transaction) => {
-      if (updateAcademicYearDto.isActive === true) {
-        await transaction.academicYear.updateMany({
+    return academicYear;
+  }
+
+  async update(id: number, dto: UpdateAcademicYearDto) {
+    const current = await this.prisma.academicYear.findUnique({
+      where: { id },
+    });
+
+    if (!current) {
+      throw new NotFoundException('Academic year not found.');
+    }
+
+    const name =
+      dto.name !== undefined ? dto.name.trim() : current.name;
+
+    const startDate =
+      dto.startDate !== undefined
+        ? new Date(dto.startDate)
+        : current.startDate;
+
+    const endDate =
+      dto.endDate !== undefined
+        ? new Date(dto.endDate)
+        : current.endDate;
+
+    this.validateDateRange(startDate, endDate);
+
+    const duplicate = await this.prisma.academicYear.findFirst({
+      where: {
+        id: { not: id },
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+      },
+      select: { id: true },
+    });
+
+    if (duplicate) {
+      throw new ConflictException(
+        'Academic year name already exists.',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      if (dto.isActive === true) {
+        await tx.academicYear.updateMany({
           where: {
+            id: { not: id },
             isActive: true,
-            NOT: {
-              id,
-            },
           },
           data: {
             isActive: false,
@@ -143,26 +146,27 @@ export class AcademicYearService {
         });
       }
 
-      return transaction.academicYear.update({
-        where: {
-          id,
-        },
+      return tx.academicYear.update({
+        where: { id },
         data: {
-          name: updateAcademicYearDto.name,
-          startDate,
-          endDate,
-          isActive: updateAcademicYearDto.isActive,
+          ...(dto.name !== undefined && { name }),
+          ...(dto.startDate !== undefined && { startDate }),
+          ...(dto.endDate !== undefined && { endDate }),
+          ...(dto.isActive !== undefined && {
+            isActive: dto.isActive,
+          }),
         },
       });
     });
   }
 
   async activate(id: number) {
-    await this.findOne(id);
+    await this.ensureAcademicYearExists(id);
 
-    return this.prisma.$transaction(async (transaction) => {
-      await transaction.academicYear.updateMany({
+    return this.prisma.$transaction(async (tx) => {
+      await tx.academicYear.updateMany({
         where: {
+          id: { not: id },
           isActive: true,
         },
         data: {
@@ -170,10 +174,8 @@ export class AcademicYearService {
         },
       });
 
-      return transaction.academicYear.update({
-        where: {
-          id,
-        },
+      return tx.academicYear.update({
+        where: { id },
         data: {
           isActive: true,
         },
@@ -181,23 +183,72 @@ export class AcademicYearService {
     });
   }
 
-  async remove(id: number) {
-    const academicYear = await this.findOne(id);
+  async deactivate(id: number) {
+    await this.ensureAcademicYearExists(id);
 
-    if (academicYear.isActive) {
+    return this.prisma.academicYear.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    await this.ensureAcademicYearExists(id);
+
+    try {
+      await this.prisma.academicYear.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'Academic year deleted successfully.',
+      };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
+        throw new ConflictException(
+          'Academic year cannot be deleted because it is linked to other records.',
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  private validateDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): void {
+    if (
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime())
+    ) {
       throw new BadRequestException(
-        'The active academic year cannot be deleted.',
+        'Start date and end date must be valid dates.',
       );
     }
 
-    await this.prisma.academicYear.delete({
-      where: {
-        id,
-      },
+    if (endDate <= startDate) {
+      throw new BadRequestException(
+        'End date must be later than start date.',
+      );
+    }
+  }
+
+  private async ensureAcademicYearExists(
+    id: number,
+  ): Promise<void> {
+    const record = await this.prisma.academicYear.findUnique({
+      where: { id },
+      select: { id: true },
     });
 
-    return {
-      message: 'Academic year deleted successfully.',
-    };
+    if (!record) {
+      throw new NotFoundException('Academic year not found.');
+    }
   }
 }

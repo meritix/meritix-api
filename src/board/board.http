@@ -1,0 +1,44 @@
+############################################################
+### MERITIX BOARD API
+############################################################
+
+@baseUrl = http://localhost:3000
+
+############################################################
+### LOGIN
+############################################################
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email":"admin@meritix.com",
+  "password":"Password123"
+}
+
+###
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNDczMjUsImV4cCI6MTc4NTQzMzcyNX0.kWggdqjGoXkcOGbiyVDiCyruvzVk7CZwgoPMtWoRNEY
+### CREATE BOARD
+############################################################
+
+POST {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code":"CBSE",
+  "name":"Central Board of Secondary Education",
+  "country":"India"
+}
+
+###
+
+############################################################
+### GET ALL BOARDS
+############################################################
+
+GET {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+
+###

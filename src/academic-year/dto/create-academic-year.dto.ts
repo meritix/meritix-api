@@ -1,27 +1,37 @@
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsOptional,
   IsString,
-  Matches,
+  Length,
 } from 'class-validator';
 
 export class CreateAcademicYearDto {
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^\d{4}-\d{2}$/, {
-    message: 'Academic year name must use the format 2026-27.',
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Academic year name must be a string.' })
+  @IsNotEmpty({ message: 'Academic year name is required.' })
+  @Length(3, 30, {
+    message: 'Academic year name must contain between 3 and 30 characters.',
   })
   name: string;
 
-  @IsDateString()
+  @IsDateString(
+    {},
+    { message: 'Start date must be a valid ISO date.' },
+  )
   startDate: string;
 
-  @IsDateString()
+  @IsDateString(
+    {},
+    { message: 'End date must be a valid ISO date.' },
+  )
   endDate: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: 'isActive must be a boolean value.' })
   isActive?: boolean;
 }

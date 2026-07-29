@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -8,32 +9,59 @@ import {
 } from 'class-validator';
 
 export class CreateSubjectDto {
-  @IsString()
-  @IsNotEmpty()
-  @Length(2, 20)
+  @Transform(({ value }) =>
+    typeof value === 'string'
+      ? value.trim().toUpperCase()
+      : value,
+  )
+  @IsString({ message: 'Subject code must be a string.' })
+  @IsNotEmpty({ message: 'Subject code is required.' })
+  @Length(1, 30, {
+    message: 'Subject code must contain between 1 and 30 characters.',
+  })
   code: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(150)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Subject name must be a string.' })
+  @IsNotEmpty({ message: 'Subject name is required.' })
+  @Length(1, 150, {
+    message: 'Subject name must contain between 1 and 150 characters.',
+  })
   name: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(50)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Short name must be a string.' })
+  @MaxLength(50, {
+    message: 'Short name cannot exceed 50 characters.',
+  })
   shortName?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(500)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Description must be a string.' })
+  @MaxLength(1000, {
+    message: 'Description cannot exceed 1000 characters.',
+  })
   description?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
+  @IsString({ message: 'Category must be a string.' })
+  @MaxLength(100, {
+    message: 'Category cannot exceed 100 characters.',
+  })
   category?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: 'isActive must be a boolean value.' })
   isActive?: boolean;
 }

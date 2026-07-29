@@ -1,0 +1,191 @@
+############################################################
+### MERITIX - CLASS MODULE
+############################################################
+
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNTEzMDAsImV4cCI6MTc4NTQzNzcwMH0.e-o0kcexkBRG2YqkxmI8b28R9O1_zfjjdWsqLNfPwiA
+
+############################################################
+### LOGIN
+############################################################
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Password123"
+}
+
+###
+
+############################################################
+### GET SCHOOLS
+### Confirm that School ID 1 exists
+############################################################
+
+GET {{baseUrl}}/schools
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### CREATE CLASS 1
+############################################################
+
+POST {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolId": 1,
+  "code": "CLASS-10",
+  "name": "Class 10",
+  "displayOrder": 10,
+  "isActive": true
+}
+
+###
+
+############################################################
+### CREATE CLASS 2
+############################################################
+
+POST {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolId": 1,
+  "code": "CLASS-9",
+  "name": "Class 9",
+  "displayOrder": 9,
+  "isActive": true
+}
+
+###
+
+############################################################
+### TEST DUPLICATE CODE
+### Expected: 409 Conflict
+############################################################
+
+POST {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolId": 1,
+  "code": "class-10",
+  "name": "Another Class",
+  "displayOrder": 11
+}
+
+###
+
+############################################################
+### TEST DUPLICATE NAME
+### Expected: 409 Conflict
+############################################################
+
+POST {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolId": 1,
+  "code": "NEW-CODE",
+  "name": "class 10",
+  "displayOrder": 11
+}
+
+###
+
+############################################################
+### TEST INVALID SCHOOL
+### Expected: 404 Not Found
+############################################################
+
+POST {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolId": 99999,
+  "code": "CLASS-8",
+  "name": "Class 8",
+  "displayOrder": 8
+}
+
+###
+
+############################################################
+### GET ALL CLASSES
+############################################################
+
+GET {{baseUrl}}/classes
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### GET CLASSES BY SCHOOL
+############################################################
+
+GET {{baseUrl}}/classes/school/1
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### GET CLASS BY ID
+### Replace 1 with the actual returned class ID
+############################################################
+
+GET {{baseUrl}}/classes/1
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### UPDATE CLASS
+### Replace 1 with the actual returned class ID
+############################################################
+
+PATCH {{baseUrl}}/classes/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "CLASS-10-A",
+  "name": "Class 10 Updated",
+  "displayOrder": 10
+}
+
+###
+
+############################################################
+### DEACTIVATE CLASS
+############################################################
+
+PATCH {{baseUrl}}/classes/1/deactivate
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### ACTIVATE CLASS
+############################################################
+
+PATCH {{baseUrl}}/classes/1/activate
+Authorization: Bearer {{token}}
+
+###
+
+############################################################
+### DELETE CLASS
+### Run last and replace 1 with the actual class ID
+############################################################
+
+DELETE {{baseUrl}}/classes/1
+Authorization: Bearer {{token}}

@@ -7,6 +7,10 @@ import { StudentModule } from './student/student.module';
 import { UsersModule } from './users/users.module';
 import { SubjectModule } from './subject/subject.module';
 import { SchoolModule } from './school/school.module';
+import { ClassModule } from './class/class.module';
+import { SectionModule } from './section/section.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ChapterModule } from './chapter/chapter.module';
 
 @Module({
   imports: [
@@ -18,6 +22,10 @@ import { SchoolModule } from './school/school.module';
     BoardModule,
     SubjectModule,
     SchoolModule,
+    ClassModule,
+    SectionModule,
+    DashboardModule,
+    ChapterModule,
   ],
   controllers: [],
   providers: [],

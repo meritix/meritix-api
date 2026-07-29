@@ -1,46 +1,48 @@
-#############################################
-### Meritix API - School Module
-#############################################
+############################################################
+### MERITIX - SCHOOL MODULE
+############################################################
 
 @baseUrl = http://localhost:3000
 
 ############################################################
-# AUTHENTICATION
+### LOGIN
 ############################################################
 
-### Register User (Run only once)
-POST {{baseUrl}}/auth/register
-Content-Type: application/json
-
-{
-  "name": "Admin User",
-  "email": "admin@meritix.com",
-  "password": "Admin@123",
-  "role": "ADMIN"
-}
-
-###
-
-### Login
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
   "email": "admin@meritix.com",
-  "password": "Admin@123"
+  "password": "Password123"
 }
 
-############################################################
-# Copy access_token from above response
-############################################################
-
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzMTIyMjgsImV4cCI6MTc4NTM5ODYyOH0.E-FSzqBGJs7lr_hokkz7ksoaRgBLzjEefW6kbG1uLDA
+###
 
 ############################################################
-# CREATE SCHOOL
+### COPY TOKEN FROM LOGIN RESPONSE
 ############################################################
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNDgyMzMsImV4cCI6MTc4NTQzNDYzM30.OSL7HwafyEXg3UHiPkD6oV_v_MrnP2W6PHcKhUuGqC8
+
+############################################################
+### GET ALL BOARDS (Run First)
+############################################################
+
+GET {{baseUrl}}/boards
+Authorization: Bearer {{token}}
 
 ###
+# NOTE:
+# Use one of the returned Board IDs.
+# Example:
+# ICSE = 2
+# RBSE = 3
+# CBSE = 4
+
+############################################################
+### CREATE SCHOOL
+############################################################
+
 POST {{baseUrl}}/schools
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -48,7 +50,7 @@ Content-Type: application/json
 {
   "code": "DPSJPR",
   "name": "Delhi Public School Jaipur",
-  "boardId": 1,
+  "boardId": 4,
   "udiseCode": "08123456789",
   "affiliationNo": "CBSE12345",
   "principalName": "Dr Rajesh Sharma",
@@ -63,44 +65,46 @@ Content-Type: application/json
   "isActive": true
 }
 
+###
+
 ############################################################
-# GET ALL SCHOOLS
+### GET ALL SCHOOLS
 ############################################################
 
-###
 GET {{baseUrl}}/schools
 Authorization: Bearer {{token}}
 
+###
+# Copy the School ID returned below.
+# Example:
+# id = 5
+
 ############################################################
-# GET SCHOOL BY ID
+### GET SCHOOL BY ID
 ############################################################
 
-###
 GET {{baseUrl}}/schools/1
 Authorization: Bearer {{token}}
 
 ############################################################
-# GET SCHOOL BY CODE
+### GET SCHOOL BY CODE
 ############################################################
 
-###
 GET {{baseUrl}}/schools/code/DPSJPR
 Authorization: Bearer {{token}}
 
 ############################################################
-# GET SCHOOLS BY BOARD
+### GET SCHOOLS BY BOARD
 ############################################################
 
-###
-GET {{baseUrl}}/schools/board/1
+GET {{baseUrl}}/schools/board/4
 Authorization: Bearer {{token}}
 
 ############################################################
-# UPDATE SCHOOL
+### UPDATE SCHOOL
 ############################################################
 
-###
-PATCH {{baseUrl}}/schools/1
+PATCH {{baseUrl}}/schools/5
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -112,25 +116,44 @@ Content-Type: application/json
 }
 
 ############################################################
-# ACTIVATE SCHOOL
+### DEACTIVATE SCHOOL
 ############################################################
 
-###
-PATCH {{baseUrl}}/schools/1/activate
+PATCH {{baseUrl}}/schools/5/deactivate
 Authorization: Bearer {{token}}
 
 ############################################################
-# DEACTIVATE SCHOOL
+### ACTIVATE SCHOOL
 ############################################################
 
-###
-PATCH {{baseUrl}}/schools/1/deactivate
+PATCH {{baseUrl}}/schools/5/activate
 Authorization: Bearer {{token}}
 
 ############################################################
-# DELETE SCHOOL
+### DELETE SCHOOL
 ############################################################
 
-###
-DELETE {{baseUrl}}/schools/1
+
+
+POST http://localhost:3000/schools
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "code": "DPSJPR",
+  "name": "Delhi Public School Jaipur",
+  "boardId": 4,
+  "city": "Jaipur",
+  "state": "Rajasthan"
+}
+
+PATCH {{baseUrl}}/schools/1
 Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Delhi Public School Jaipur Updated",
+  "city": "New Jaipur",
+  "principalName": "Dr Amit Sharma",
+  "phone": "9999999999"
+}

@@ -1,0 +1,90 @@
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNTQwODQsImV4cCI6MTc4NTQ0MDQ4NH0.Wpg4RdleSldGb33Ylsy_X4204VJlW4tth_WQRapi-rk
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Password123"
+}
+############################################################
+### CREATE SECTION
+############################################################
+
+POST {{baseUrl}}/sections
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "classId": 1,
+  "code": "A",
+  "name": "Section A",
+  "capacity": 40,
+  "isActive": true
+}
+
+###
+
+GET {{baseUrl}}/sections
+Authorization: Bearer {{token}}
+
+###
+
+GET {{baseUrl}}/sections/class/1
+Authorization: Bearer {{token}}
+
+############################################################
+### CREATE ACADEMIC YEAR
+############################################################
+
+###
+
+POST {{baseUrl}}/academic-years
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "2026-2027",
+  "startDate": "2026-04-01",
+  "endDate": "2027-03-31",
+  "isActive": true
+}
+
+###
+
+GET {{baseUrl}}/academic-years
+Authorization: Bearer {{token}}
+
+###
+
+GET {{baseUrl}}/academic-years/active
+Authorization: Bearer {{token}}
+
+############################################################
+### CREATE SUBJECT
+############################################################
+
+###
+
+POST {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "MATH",
+  "name": "Mathematics",
+  "shortName": "Maths",
+  "description": "Mathematics subject",
+  "category": "Core",
+  "isActive": true
+}
+
+###
+
+GET {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+
+###
+
+GET {{baseUrl}}/subjects/code/MATH
+Authorization: Bearer {{token}}

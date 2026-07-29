@@ -1,0 +1,147 @@
+##################################################
+### VARIABLES
+##################################################
+
+@baseUrl = http://localhost:3000
+
+##################################################
+### LOGIN
+##################################################
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Password123"
+}
+
+###
+
+# Copy the access_token from the response and paste it below.
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNTY0OTYsImV4cCI6MTc4NTQ0Mjg5Nn0.oh5lz80ClouUO_LsIPmedcBRDvobTzngqbKsw-nSef4
+
+##################################################
+### DASHBOARD
+##################################################
+
+GET {{baseUrl}}/dashboard/summary
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### CREATE CHAPTER
+##################################################
+
+POST {{baseUrl}}/chapters
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Number System",
+  "code": "MATH-CH-01",
+  "description": "Introduction to the number system",
+  "subjectId": 1,
+  "sequence": 1,
+  "isActive": true
+}
+
+###
+
+##################################################
+### GET ALL CHAPTERS
+##################################################
+
+GET {{baseUrl}}/chapters
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### SEARCH CHAPTERS
+##################################################
+
+GET {{baseUrl}}/chapters?search=number&page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### FILTER BY SUBJECT
+##################################################
+
+GET {{baseUrl}}/chapters?subjectId=1&isActive=true
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### GET CHAPTERS BY SUBJECT
+##################################################
+
+GET {{baseUrl}}/chapters/subject/1
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### GET CHAPTER BY ID
+##################################################
+
+GET {{baseUrl}}/chapters/1
+Authorization: Bearer {{token}}
+
+###
+
+##################################################
+### UPDATE CHAPTER
+##################################################
+
+PATCH {{baseUrl}}/chapters/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Number Systems",
+  "code": "MATH-CH-01",
+  "sequence": 2
+}
+
+###
+
+##################################################
+### DEACTIVATE CHAPTER
+##################################################
+
+PATCH {{baseUrl}}/chapters/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+
+###
+
+##################################################
+### ACTIVATE CHAPTER
+##################################################
+
+PATCH {{baseUrl}}/chapters/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isActive": true
+}
+
+###
+
+##################################################
+### DELETE CHAPTER
+##################################################
+
+DELETE {{baseUrl}}/chapters/1
+Authorization: Bearer {{token}}
