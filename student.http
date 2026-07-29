@@ -1,0 +1,82 @@
+@baseUrl = http://localhost:3000
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoicmFodWxAbWVyaXRpeC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NTA4NTI2OCwiZXhwIjoxNzg1MTcxNjY4fQ.ws-GBmifvxSsenXScwshHPCboZBr6zxJ95I_xsjnSjY
+
+@studentId = 1
+
+@meritixId = MX260000001
+
+
+### 1. Login
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "rahul@meritix.com",
+  "password": "Password123"
+}
+
+
+### 2. Create Student Profile
+
+POST {{baseUrl}}/student
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "admissionNumber": "ADM-2026-001",
+  "firstName": "Rahul",
+  "middleName": "",
+  "lastName": "Sharma",
+  "gender": "Male",
+  "dob": "2008-04-15",
+  "phone": "9876543210",
+  "alternatePhone": "9876543211",
+  "bloodGroup": "O+",
+  "nationality": "Indian",
+  "religion": "Hindu",
+  "category": "General"
+}
+
+
+### 3. Get Logged-in Student
+
+GET {{baseUrl}}/student/me
+Authorization: Bearer {{token}}
+
+
+### 4. Search by Meritix ID
+
+GET {{baseUrl}}/student/meritix/{{meritixId}}
+Authorization: Bearer {{token}}
+
+
+### 5. Get All Students
+
+GET {{baseUrl}}/student
+Authorization: Bearer {{token}}
+
+
+### 6. Get Student by Database ID
+
+GET {{baseUrl}}/student/{{studentId}}
+Authorization: Bearer {{token}}
+
+
+### 7. Update Student
+
+PATCH {{baseUrl}}/student/{{studentId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "9999999999",
+  "bloodGroup": "A+"
+}
+
+
+### 8. Delete Student (Don't run now)
+
+DELETE {{baseUrl}}/student/{{studentId}}
+Authorization: Bearer {{token}}

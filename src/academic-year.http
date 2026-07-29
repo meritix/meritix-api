@@ -1,0 +1,87 @@
+@baseUrl = http://localhost:3000
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoicmFodWxAbWVyaXRpeC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NTA4OTc1MCwiZXhwIjoxNzg1MTc2MTUwfQ.NXdeMbFA2x-g8yb9sfhMY3135fokd8qzl2FYq9mbujA
+
+@academicYearId = 1
+
+
+### 1. Login
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "rahul@meritix.com",
+  "password": "Password123"
+}
+
+
+### 2. Create active academic year
+
+POST {{baseUrl}}/academic-years
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "2026-27",
+  "startDate": "2026-04-01",
+  "endDate": "2027-03-31",
+  "isActive": true
+}
+
+
+### 3. Create second academic year
+
+POST {{baseUrl}}/academic-years
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "2027-28",
+  "startDate": "2027-04-01",
+  "endDate": "2028-03-31",
+  "isActive": false
+}
+
+
+### 4. Get all academic years
+
+GET {{baseUrl}}/academic-years
+Authorization: Bearer {{token}}
+
+
+### 5. Get active academic year
+
+GET {{baseUrl}}/academic-years/active
+Authorization: Bearer {{token}}
+
+
+### 6. Get academic year by ID
+
+GET {{baseUrl}}/academic-years/{{academicYearId}}
+Authorization: Bearer {{token}}
+
+
+### 7. Update academic year
+
+PATCH {{baseUrl}}/academic-years/{{academicYearId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "2026-27",
+  "startDate": "2026-04-01",
+  "endDate": "2027-03-31"
+}
+
+
+### 8. Activate academic year
+
+PATCH {{baseUrl}}/academic-years/{{academicYearId}}/activate
+Authorization: Bearer {{token}}
+
+
+### 9. Delete academic year — do not run on the active year
+
+DELETE {{baseUrl}}/academic-years/{{academicYearId}}
+Authorization: Bearer {{token}}

@@ -1,0 +1,131 @@
+@baseUrl = http://localhost:3000
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoicmFodWxAbWVyaXRpeC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NTMzMzk1MywiZXhwIjoxNzg1NDIwMzUzfQ.tNvu-VANurGS9ymPMyyNCRaJ64-VMrtnjB470kgF8fQ
+
+@boardId = 1
+
+@boardCode = CBSE
+
+
+### 1. Login
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "rahul@meritix.com",
+  "password": "Password123"
+}
+
+
+### 2. Create CBSE board
+
+POST {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "CBSE",
+  "name": "Central Board of Secondary Education",
+  "description": "National-level education board in India.",
+  "website": "https://www.cbse.gov.in",
+  "country": "India",
+  "isActive": true
+}
+
+
+### 3. Create ICSE board
+
+POST {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "ICSE",
+  "name": "Indian Certificate of Secondary Education",
+  "description": "School education board administered by CISCE.",
+  "website": "https://cisce.org",
+  "country": "India",
+  "isActive": true
+}
+
+
+### 4. Create RBSE board
+
+POST {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "RBSE",
+  "name": "Board of Secondary Education Rajasthan",
+  "description": "State education board of Rajasthan.",
+  "country": "India",
+  "isActive": true
+}
+
+
+### 5. Get all boards
+
+GET {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+
+
+### 6. Get active boards
+
+GET {{baseUrl}}/boards/active
+Authorization: Bearer {{token}}
+
+
+### 7. Find board by code
+
+GET {{baseUrl}}/boards/code/{{boardCode}}
+Authorization: Bearer {{token}}
+
+
+### 8. Get board by database ID
+
+GET {{baseUrl}}/boards/{{boardId}}
+Authorization: Bearer {{token}}
+
+
+### 9. Update board
+
+PATCH {{baseUrl}}/boards/{{boardId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Updated description for the education board."
+}
+
+
+### 10. Deactivate board
+
+PATCH {{baseUrl}}/boards/{{boardId}}/deactivate
+Authorization: Bearer {{token}}
+
+
+### 11. Activate board
+
+PATCH {{baseUrl}}/boards/{{boardId}}/activate
+Authorization: Bearer {{token}}
+
+
+### 12. Duplicate-code test
+
+POST {{baseUrl}}/boards
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "CBSE",
+  "name": "Duplicate CBSE Board",
+  "country": "India"
+}
+
+
+### 13. Delete board — do not run yet
+
+DELETE {{baseUrl}}/boards/{{boardId}}
+Authorization: Bearer {{token}}
