@@ -7,11 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////
+
 enum Role {
   ADMIN
   STUDENT
-  TEACHER
-  SCHOOL
 }
 
 enum Difficulty {
@@ -32,11 +34,16 @@ enum TestStatus {
   ARCHIVED
 }
 
+//////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////
+
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   name     String
-  email    String  @unique
+  email    String @unique
   password String
+
   role     Role    @default(STUDENT)
   isActive Boolean @default(true)
 
@@ -51,56 +58,51 @@ model User {
   @@map("users")
 }
 
-model Board {
-  id          Int     @id @default(autoincrement())
-  code        String  @unique
-  name        String  @unique
-  description String?
-  isActive    Boolean @default(true)
-
-  subjects Subject[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([isActive])
-  @@map("boards")
-}
+//////////////////////////////////////////////////
+// SUBJECT
+//////////////////////////////////////////////////
 
 model Subject {
-  id          Int     @id @default(autoincrement())
-  boardId     Int
-  code        String
-  name        String
+  id Int @id @default(autoincrement())
+
+  code String @unique
+  name String @unique
+
   shortName   String?
   description String?
   category    String?
-  isActive    Boolean @default(true)
 
-  board     Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  isActive Boolean @default(true)
+
   chapters  Chapter[]
   questions Question[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([boardId, code])
-  @@unique([boardId, name])
-  @@index([boardId])
   @@index([isActive])
   @@map("subjects")
 }
 
+//////////////////////////////////////////////////
+// CHAPTER
+//////////////////////////////////////////////////
+
 model Chapter {
-  id          Int     @id @default(autoincrement())
-  subjectId   Int
-  code        String
-  name        String
+  id Int @id @default(autoincrement())
+
+  subjectId Int
+
+  code String
+  name String
+
   description String?
   sequence    Int     @default(1)
-  isActive    Boolean @default(true)
 
-  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  isActive Boolean @default(true)
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
   topics    Topic[]
   questions Question[]
 
@@ -115,16 +117,25 @@ model Chapter {
   @@map("chapters")
 }
 
+//////////////////////////////////////////////////
+// TOPIC
+//////////////////////////////////////////////////
+
 model Topic {
-  id          Int     @id @default(autoincrement())
-  chapterId   Int
-  code        String
-  name        String
+  id Int @id @default(autoincrement())
+
+  chapterId Int
+
+  code String
+  name String
+
   description String?
   sequence    Int     @default(1)
-  isActive    Boolean @default(true)
 
-  chapter   Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  isActive Boolean @default(true)
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
   questions Question[]
 
   createdAt DateTime @default(now())
@@ -138,21 +149,33 @@ model Topic {
   @@map("topics")
 }
 
+//////////////////////////////////////////////////
+// QUESTION
+//////////////////////////////////////////////////
+
 model Question {
-  id                   Int          @id @default(autoincrement())
-  subjectId            Int
-  chapterId            Int
-  topicId              Int?
-  code                 String
-  questionText         String       @db.Text
-  explanation          String?      @db.Text
-  questionType         QuestionType @default(SINGLE)
-  difficulty           Difficulty   @default(MEDIUM)
-  marks                Float        @default(1)
-  negativeMarks        Float        @default(0)
+  id Int @id @default(autoincrement())
+
+  subjectId Int
+  chapterId Int
+  topicId   Int?
+
+  code String
+
+  questionText String  @db.Text
+  explanation  String? @db.Text
+
+  questionType QuestionType @default(SINGLE)
+  difficulty   Difficulty   @default(MEDIUM)
+
+  marks         Float @default(1)
+  negativeMarks Float @default(0)
+
   estimatedTimeSeconds Int?
-  imageUrl             String?
-  isActive             Boolean      @default(true)
+
+  imageUrl String?
+
+  isActive Boolean @default(true)
 
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
@@ -175,15 +198,25 @@ model Question {
   @@map("questions")
 }
 
-model QuestionOption {
-  id         Int     @id @default(autoincrement())
-  questionId Int
-  optionText String  @db.Text
-  imageUrl   String?
-  isCorrect  Boolean @default(false)
-  sequence   Int
+//////////////////////////////////////////////////
+// QUESTION OPTION
+//////////////////////////////////////////////////
 
-  question        Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+model QuestionOption {
+  id Int @id @default(autoincrement())
+
+  questionId Int
+
+  optionText String @db.Text
+
+  imageUrl String?
+
+  isCorrect Boolean @default(false)
+
+  sequence Int
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
   selectedAnswers AttemptAnswer[]
 
   createdAt DateTime @default(now())
@@ -191,22 +224,33 @@ model QuestionOption {
 
   @@unique([questionId, sequence])
   @@index([questionId])
-  @@index([isCorrect])
   @@map("question_options")
 }
 
+//////////////////////////////////////////////////
+// TEST
+//////////////////////////////////////////////////
+
 model Test {
-  id          Int        @id @default(autoincrement())
-  title       String
-  description String?    @db.Text
-  duration    Int
-  totalMarks  Float
-  status      TestStatus @default(DRAFT)
+  id Int @id @default(autoincrement())
+
+  title String
+
+  description String? @db.Text
+
+  duration Int
+
+  totalMarks Float
+
+  status TestStatus @default(DRAFT)
+
   createdById Int
 
-  createdBy User           @relation("CreatedTests", fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy User @relation("CreatedTests", fields: [createdById], references: [id], onDelete: Restrict)
+
   questions TestQuestion[]
-  attempts  Attempt[]
+
+  attempts Attempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -216,36 +260,53 @@ model Test {
   @@map("tests")
 }
 
+//////////////////////////////////////////////////
+// TEST QUESTION
+//////////////////////////////////////////////////
+
 model TestQuestion {
-  id            Int    @id @default(autoincrement())
-  testId        Int
-  questionId    Int
-  sequence      Int
+  id Int @id @default(autoincrement())
+
+  testId     Int
+  questionId Int
+
+  sequence Int
+
   marks         Float?
   negativeMarks Float?
 
-  test     Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([testId, questionId])
   @@unique([testId, sequence])
-  @@index([testId])
-  @@index([questionId])
   @@map("test_questions")
 }
 
-model Attempt {
-  id            Int       @id @default(autoincrement())
-  userId        Int
-  testId        Int
-  obtainedMarks Float     @default(0)
-  totalMarks    Float
-  percentage    Float     @default(0)
-  startedAt     DateTime  @default(now())
-  submittedAt   DateTime?
+//////////////////////////////////////////////////
+// ATTEMPT
+//////////////////////////////////////////////////
 
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  test    Test            @relation(fields: [testId], references: [id], onDelete: Cascade)
+model Attempt {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  testId Int
+
+  obtainedMarks Float @default(0)
+
+  totalMarks Float
+
+  percentage Float @default(0)
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
   answers AttemptAnswer[]
 
   createdAt DateTime @default(now())
@@ -253,28 +314,34 @@ model Attempt {
 
   @@index([userId])
   @@index([testId])
-  @@index([submittedAt])
   @@map("attempts")
 }
 
-model AttemptAnswer {
-  id               Int     @id @default(autoincrement())
-  attemptId        Int
-  questionId       Int
-  selectedOptionId Int?
-  isCorrect        Boolean @default(false)
-  marksAwarded     Float   @default(0)
+//////////////////////////////////////////////////
+// ATTEMPT ANSWER
+//////////////////////////////////////////////////
 
-  attempt        Attempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question       Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+model AttemptAnswer {
+  id Int @id @default(autoincrement())
+
+  attemptId  Int
+  questionId Int
+
+  selectedOptionId Int?
+
+  isCorrect Boolean @default(false)
+
+  marksAwarded Float @default(0)
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
   selectedOption QuestionOption? @relation(fields: [selectedOptionId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([attemptId, questionId])
-  @@index([attemptId])
-  @@index([questionId])
-  @@index([selectedOptionId])
   @@map("attempt_answers")
 }

@@ -1,147 +1,115 @@
-##################################################
-### VARIABLES
-##################################################
+### ============================================================
+### Meritix - Chapter Module
+### ============================================================
 
 @baseUrl = http://localhost:3000
+POST http://localhost:3000/auth/register
 
-##################################################
-### LOGIN
-##################################################
+Content-Type: application/json
 
-POST {{baseUrl}}/auth/login
+{
+  "name": "Administrator",
+  "email": "admin@meritix.com",
+  "password": "Admin@123",
+  "role": "ADMIN"
+}
+### Login
+### Login
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
   "email": "admin@meritix.com",
   "password": "Password123"
 }
-
 ###
 
-# Copy the access_token from the response and paste it below.
-
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODUzNTY0OTYsImV4cCI6MTc4NTQ0Mjg5Nn0.oh5lz80ClouUO_LsIPmedcBRDvobTzngqbKsw-nSef4
-
-##################################################
-### DASHBOARD
-##################################################
-
-GET {{baseUrl}}/dashboard/summary
-Authorization: Bearer {{token}}
-
-###
-
-##################################################
-### CREATE CHAPTER
-##################################################
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU0MDYxNjAsImV4cCI6MTc4NTQ5MjU2MH0.3VLMXN6iHO5AmAN71OWZ6uDQuwY_bXS_Xw-gZnmTXGE
+### ============================================================
+### Create Chapter
+### ============================================================
 
 POST {{baseUrl}}/chapters
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Number System",
-  "code": "MATH-CH-01",
-  "description": "Introduction to the number system",
   "subjectId": 1,
+  "code": "ALG",
+  "name": "Algebra",
+  "description": "Algebra fundamentals",
   "sequence": 1,
   "isActive": true
 }
 
 ###
 
-##################################################
-### GET ALL CHAPTERS
-##################################################
+### Create Chapter 2
+
+POST {{baseUrl}}/chapters
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "subjectId": 1,
+  "code": "GEO",
+  "name": "Geometry",
+  "description": "Geometry basics",
+  "sequence": 2
+}
+
+###
+
+### Get All Chapters
 
 GET {{baseUrl}}/chapters
 Authorization: Bearer {{token}}
 
 ###
 
-##################################################
-### SEARCH CHAPTERS
-##################################################
-
-GET {{baseUrl}}/chapters?search=number&page=1&limit=10
-Authorization: Bearer {{token}}
-
-###
-
-##################################################
-### FILTER BY SUBJECT
-##################################################
-
-GET {{baseUrl}}/chapters?subjectId=1&isActive=true
-Authorization: Bearer {{token}}
-
-###
-
-##################################################
-### GET CHAPTERS BY SUBJECT
-##################################################
-
-GET {{baseUrl}}/chapters/subject/1
-Authorization: Bearer {{token}}
-
-###
-
-##################################################
-### GET CHAPTER BY ID
-##################################################
+### Get Chapter By ID
 
 GET {{baseUrl}}/chapters/1
 Authorization: Bearer {{token}}
 
 ###
 
-##################################################
-### UPDATE CHAPTER
-##################################################
+### Get Chapters By Subject
+
+GET {{baseUrl}}/chapters/subject/1
+Authorization: Bearer {{token}}
+
+###
+
+### Update Chapter
 
 PATCH {{baseUrl}}/chapters/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Number Systems",
-  "code": "MATH-CH-01",
-  "sequence": 2
+  "name": "Advanced Algebra",
+  "sequence": 5
 }
 
 ###
 
-##################################################
-### DEACTIVATE CHAPTER
-##################################################
+### Activate Chapter
 
-PATCH {{baseUrl}}/chapters/1/status
+PATCH {{baseUrl}}/chapters/1/activate
 Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "isActive": false
-}
 
 ###
 
-##################################################
-### ACTIVATE CHAPTER
-##################################################
+### Deactivate Chapter
 
-PATCH {{baseUrl}}/chapters/1/status
+PATCH {{baseUrl}}/chapters/1/deactivate
 Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "isActive": true
-}
 
 ###
 
-##################################################
-### DELETE CHAPTER
-##################################################
+### Delete Chapter
 
-DELETE {{baseUrl}}/chapters/1
+DELETE {{baseUrl}}/chapters/2
 Authorization: Bearer {{token}}
+

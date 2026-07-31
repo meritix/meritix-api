@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -13,27 +12,26 @@ import { UpdateChapterDto } from './dto/update-chapter.dto';
 export class ChapterService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createChapterDto: CreateChapterDto) {
-    const name = createChapterDto.name.trim();
-    const code = createChapterDto.code.trim().toUpperCase();
-    const description = createChapterDto.description?.trim() || null;
+  async create(dto: CreateChapterDto) {
+    await this.ensureSubjectExists(dto.subjectId);
 
-    await this.ensureSubjectExists(createChapterDto.subjectId);
+    const code = dto.code.trim().toUpperCase();
+    const name = dto.name.trim();
 
-    await this.ensureChapterIsUnique(
-      createChapterDto.subjectId,
-      name,
+    await this.ensureUniqueValues(
+      dto.subjectId,
       code,
+      name,
     );
 
     return this.prisma.chapter.create({
       data: {
-        name,
+        subjectId: dto.subjectId,
         code,
-        description,
-        subjectId: createChapterDto.subjectId,
-        sequence: createChapterDto.sequence ?? 1,
-        isActive: createChapterDto.isActive ?? true,
+        name,
+        description: dto.description?.trim(),
+        sequence: dto.sequence ?? 1,
+        isActive: dto.isActive ?? true,
       },
       include: {
         subject: true,
@@ -41,90 +39,40 @@ export class ChapterService {
     });
   }
 
-  async findAll(
-    search?: string,
-    subjectId?: number,
-    isActive?: boolean,
-    page = 1,
-    limit = 20,
-  ) {
-    const safePage = Math.max(page, 1);
-    const safeLimit = Math.min(Math.max(limit, 1), 100);
-    const skip = (safePage - 1) * safeLimit;
-
-    const where: Prisma.ChapterWhereInput = {
-      ...(subjectId !== undefined && { subjectId }),
-      ...(isActive !== undefined && { isActive }),
-      ...(search?.trim() && {
-        OR: [
-          {
-            name: {
-              contains: search.trim(),
-              mode: 'insensitive',
-            },
-          },
-          {
-            code: {
-              contains: search.trim(),
-              mode: 'insensitive',
-            },
-          },
-          {
-            description: {
-              contains: search.trim(),
-              mode: 'insensitive',
-            },
-          },
-        ],
-      }),
-    };
-
-    const [data, total] = await Promise.all([
-      this.prisma.chapter.findMany({
-        where,
-        skip,
-        take: safeLimit,
-        orderBy: [
-          {
-            sequence: 'asc',
-          },
-          {
+  async findAll() {
+    return this.prisma.chapter.findMany({
+      include: {
+        subject: true,
+      },
+      orderBy: [
+        {
+          subject: {
             name: 'asc',
           },
-        ],
-        include: {
-          subject: true,
         },
-      }),
-
-      this.prisma.chapter.count({
-        where,
-      }),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        total,
-        page: safePage,
-        limit: safeLimit,
-        totalPages: Math.ceil(total / safeLimit),
-      },
-    };
+        {
+          sequence: 'asc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+    });
   }
 
   async findOne(id: number) {
-    const chapter = await this.prisma.chapter.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        subject: true,
-      },
-    });
+    const chapter =
+      await this.prisma.chapter.findUnique({
+        where: { id },
+        include: {
+          subject: true,
+        },
+      });
 
     if (!chapter) {
-      throw new NotFoundException('Chapter not found.');
+      throw new NotFoundException(
+        'Chapter not found.',
+      );
     }
 
     return chapter;
@@ -145,170 +93,207 @@ export class ChapterService {
           name: 'asc',
         },
       ],
+    });
+  }
+
+  async update(
+    id: number,
+    dto: UpdateChapterDto,
+  ) {
+    const current =
+      await this.prisma.chapter.findUnique({
+        where: { id },
+      });
+
+    if (!current) {
+      throw new NotFoundException(
+        'Chapter not found.',
+      );
+    }
+
+    const subjectId =
+      dto.subjectId ?? current.subjectId;
+
+    await this.ensureSubjectExists(subjectId);
+
+    const code =
+      dto.code !== undefined
+        ? dto.code.trim().toUpperCase()
+        : current.code;
+
+    const name =
+      dto.name !== undefined
+        ? dto.name.trim()
+        : current.name;
+
+    await this.ensureUniqueValues(
+      subjectId,
+      code,
+      name,
+      id,
+    );
+
+    return this.prisma.chapter.update({
+      where: { id },
+      data: {
+        ...(dto.subjectId !== undefined && {
+          subjectId,
+        }),
+        ...(dto.code !== undefined && {
+          code,
+        }),
+        ...(dto.name !== undefined && {
+          name,
+        }),
+        ...(dto.description !== undefined && {
+          description:
+            dto.description?.trim(),
+        }),
+        ...(dto.sequence !== undefined && {
+          sequence: dto.sequence,
+        }),
+        ...(dto.isActive !== undefined && {
+          isActive: dto.isActive,
+        }),
+      },
       include: {
         subject: true,
       },
     });
   }
 
-  async update(id: number, updateChapterDto: UpdateChapterDto) {
-    const existingChapter = await this.findOne(id);
+  async activate(id: number) {
+    await this.ensureChapterExists(id);
 
-    const subjectId =
-      updateChapterDto.subjectId ?? existingChapter.subjectId;
+    return this.prisma.chapter.update({
+      where: { id },
+      data: {
+        isActive: true,
+      },
+    });
+  }
 
-    const name =
-      updateChapterDto.name !== undefined
-        ? updateChapterDto.name.trim()
-        : existingChapter.name;
+  async deactivate(id: number) {
+    await this.ensureChapterExists(id);
 
-    const code =
-      updateChapterDto.code !== undefined
-        ? updateChapterDto.code.trim().toUpperCase()
-        : existingChapter.code;
-
-    const description =
-      updateChapterDto.description !== undefined
-        ? updateChapterDto.description.trim() || null
-        : existingChapter.description;
-
-    if (updateChapterDto.subjectId !== undefined) {
-      await this.ensureSubjectExists(subjectId);
-    }
-
-    await this.ensureChapterIsUnique(subjectId, name, code, id);
-
-    try {
-      return await this.prisma.chapter.update({
-        where: {
-          id,
-        },
-        data: {
-          ...(updateChapterDto.name !== undefined && { name }),
-          ...(updateChapterDto.code !== undefined && { code }),
-          ...(updateChapterDto.description !== undefined && {
-            description,
-          }),
-          ...(updateChapterDto.subjectId !== undefined && {
-            subjectId,
-          }),
-          ...(updateChapterDto.sequence !== undefined && {
-            sequence: updateChapterDto.sequence,
-          }),
-          ...(updateChapterDto.isActive !== undefined && {
-            isActive: updateChapterDto.isActive,
-          }),
-        },
-        include: {
-          subject: true,
-        },
-      });
-    } catch (error) {
-      this.handlePrismaError(error);
-    }
+    return this.prisma.chapter.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+    });
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    await this.ensureChapterExists(id);
 
-    return this.prisma.chapter.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prisma.chapter.delete({
+        where: { id },
+      });
+
+      return {
+        message:
+          'Chapter deleted successfully.',
+      };
+    } catch (error) {
+      if (
+        error instanceof
+          Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
+        throw new ConflictException(
+          'Chapter cannot be deleted because it is linked to other records.',
+        );
+      }
+
+      throw error;
+    }
   }
 
-  async changeStatus(id: number, isActive: boolean) {
-    await this.findOne(id);
-
-    return this.prisma.chapter.update({
-      where: {
-        id,
-      },
-      data: {
-        isActive,
-      },
-      include: {
-        subject: true,
-      },
-    });
-  }
-
-  private async ensureSubjectExists(subjectId: number) {
-    const subject = await this.prisma.subject.findUnique({
-      where: {
-        id: subjectId,
-      },
-      select: {
-        id: true,
-      },
-    });
+  private async ensureSubjectExists(
+    subjectId: number,
+  ) {
+    const subject =
+      await this.prisma.subject.findUnique({
+        where: {
+          id: subjectId,
+        },
+        select: {
+          id: true,
+        },
+      });
 
     if (!subject) {
-      throw new BadRequestException('Subject not found.');
+      throw new NotFoundException(
+        'Subject not found.',
+      );
     }
   }
 
-  private async ensureChapterIsUnique(
+  private async ensureChapterExists(
+    id: number,
+  ) {
+    const chapter =
+      await this.prisma.chapter.findUnique({
+        where: { id },
+        select: {
+          id: true,
+        },
+      });
+
+    if (!chapter) {
+      throw new NotFoundException(
+        'Chapter not found.',
+      );
+    }
+  }
+
+  private async ensureUniqueValues(
     subjectId: number,
-    name: string,
     code: string,
+    name: string,
     excludeId?: number,
   ) {
-    const duplicate = await this.prisma.chapter.findFirst({
-      where: {
-        subjectId,
-        ...(excludeId !== undefined && {
-          id: {
-            not: excludeId,
-          },
-        }),
-        OR: [
-          {
-            name: {
-              equals: name,
-              mode: 'insensitive',
+    const duplicateCode =
+      await this.prisma.chapter.findFirst({
+        where: {
+          subjectId,
+          code,
+          ...(excludeId !== undefined && {
+            id: {
+              not: excludeId,
             },
-          },
-          {
-            code: {
-              equals: code,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      select: {
-        name: true,
-        code: true,
-      },
-    });
+          }),
+        },
+      });
 
-    if (!duplicate) {
-      return;
-    }
-
-    if (duplicate.name.toLowerCase() === name.toLowerCase()) {
+    if (duplicateCode) {
       throw new ConflictException(
-        'A chapter with this name already exists for the subject.',
+        'Chapter code already exists in this subject.',
       );
     }
 
-    throw new ConflictException(
-      'A chapter with this code already exists for the subject.',
-    );
-  }
+    const duplicateName =
+      await this.prisma.chapter.findFirst({
+        where: {
+          subjectId,
+          name: {
+            equals: name,
+            mode: 'insensitive',
+          },
+          ...(excludeId !== undefined && {
+            id: {
+              not: excludeId,
+            },
+          }),
+        },
+      });
 
-  private handlePrismaError(error: unknown): never {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (duplicateName) {
       throw new ConflictException(
-        'A chapter with this name or code already exists.',
+        'Chapter name already exists in this subject.',
       );
     }
-
-    throw error;
   }
 }

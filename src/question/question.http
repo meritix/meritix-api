@@ -1,0 +1,124 @@
+
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin",
+  "email": "admin@meritix.com",
+  "password": "Admin@123",
+  "role": "ADMIN"
+}
+
+###########################################################
+### LOGIN
+###########################################################
+
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Admin@123"
+}
+
+###
+
+@token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU0MDkzMDQsImV4cCI6MTc4NTQ5NTcwNH0.h_rGWGNQ_7bEP5uFcpP0JDR6LCB5CqjK2T6AsX2AGc8
+###########################################################
+### CREATE QUESTION
+###########################################################
+
+POST http://localhost:3000/questions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "subjectId": 1,
+  "chapterId": 1,
+  "topicId": 1,
+  "code": "Q001",
+  "questionText": "What is the capital of India?",
+  "explanation": "New Delhi is the capital of India.",
+  "questionType": "SINGLE",
+  "difficulty": "EASY",
+  "marks": 1,
+  "negativeMarks": 0,
+  "estimatedTimeSeconds": 30,
+  "imageUrl": "https://example.com/question.png",
+  "isActive": true
+}
+
+###
+
+###########################################################
+### GET ALL QUESTIONS
+###########################################################
+
+GET http://localhost:3000/questions
+Authorization: Bearer {{token}}
+
+###
+
+###########################################################
+### GET QUESTION BY ID
+###########################################################
+
+GET http://localhost:3000/questions/1
+Authorization: Bearer {{token}}
+
+###
+
+###########################################################
+### GET QUESTIONS BY SUBJECT
+###########################################################
+
+GET http://localhost:3000/questions/subject/1
+Authorization: Bearer {{token}}
+
+###
+
+###########################################################
+### GET QUESTIONS BY CHAPTER
+###########################################################
+
+GET http://localhost:3000/questions/chapter/1
+Authorization: Bearer {{token}}
+
+###
+
+###########################################################
+### GET QUESTIONS BY TOPIC
+###########################################################
+
+GET http://localhost:3000/questions/topic/1
+Authorization: Bearer {{token}}
+
+###
+
+###########################################################
+### UPDATE QUESTION
+###########################################################
+
+PATCH http://localhost:3000/questions/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "questionText": "Which city is the capital of India?",
+  "difficulty": "MEDIUM",
+  "marks": 2,
+  "negativeMarks": 0.5,
+  "estimatedTimeSeconds": 45,
+  "isActive": true
+}
+
+###
+
+###########################################################
+### DELETE QUESTION
+###########################################################
+
+DELETE http://localhost:3000/questions/1
+Authorization: Bearer {{token}}
+
+###

@@ -1,0 +1,97 @@
+### ============================================================
+### Meritix Authentication API
+### ============================================================
+
+@baseUrl = http://localhost:3000
+
+### ============================================================
+### Health Check
+### ============================================================
+
+GET {{baseUrl}}/auth
+
+###
+
+### ============================================================
+### Register ADMIN
+### ============================================================
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Administrator",
+  "email": "admin@meritix.com",
+  "password": "Admin@123",
+  "role": "ADMIN"
+}
+
+###
+
+### ============================================================
+### Register STUDENT
+### ============================================================
+
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@meritix.com",
+  "password": "John@123",
+  "role": "STUDENT"
+}
+
+###
+
+### ============================================================
+### Login ADMIN
+### ============================================================
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Admin@123"
+}
+
+###
+
+### ============================================================
+### Login STUDENT
+### ============================================================
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@meritix.com",
+  "password": "John@123"
+}
+
+###
+
+### ============================================================
+### Copy the JWT token from Login response
+### ============================================================
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU0MDI2NTgsImV4cCI6MTc4NTQ4OTA1OH0.zaLnEl5fpsDRVrg6VSl0aq_mXdYHzVLjQw_jZl82FqU
+
+###
+
+### ============================================================
+### Get Logged-in User Profile
+### ============================================================
+
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+
+###
+
+### ============================================================
+### Admin Only Endpoint
+### ============================================================
+
+GET {{baseUrl}}/auth/admin
+Authorization: Bearer {{token}}

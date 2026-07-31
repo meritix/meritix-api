@@ -1,0 +1,119 @@
+### ============================================================
+### Meritix - Subject Module
+### ============================================================
+
+@baseUrl = http://localhost:3000
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "name": "Administrator",
+  "email": "admin@meritix.com",
+  "password": "Admin@123",
+  "role": "ADMIN"
+}
+### ------------------------------------------------------------
+### Login
+### ------------------------------------------------------------
+
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Admin@23"
+}
+
+### ------------------------------------------------------------
+### Copy the JWT from the login response and paste below
+### ------------------------------------------------------------
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU0MDU4ODYsImV4cCI6MTc4NTQ5MjI4Nn0.P_gkeNvQb8w7niFJtC9j9KmdShJ9KydBeu8mfiKVUaA
+### Create Subject
+### ============================================================
+
+POST {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "MATH",
+  "name": "Mathematics",
+  "shortName": "Math",
+  "description": "Mathematics Subject",
+  "category": "Science",
+  "isActive": true
+}
+
+### ============================================================
+### Create Subject 2
+### ============================================================
+
+POST {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "PHY",
+  "name": "Physics",
+  "shortName": "Phy",
+  "description": "Physics Subject",
+  "category": "Science"
+}
+
+### ============================================================
+### Get All Subjects
+### ============================================================
+
+GET {{baseUrl}}/subjects
+Authorization: Bearer {{token}}
+
+### ============================================================
+### Get Subject By ID
+### ============================================================
+
+GET {{baseUrl}}/subjects/1
+Authorization: Bearer {{token}}
+
+### ============================================================
+### Get Subject By Code
+### ============================================================
+
+GET {{baseUrl}}/subjects/code/MATH
+Authorization: Bearer {{token}}
+
+### ============================================================
+### Update Subject
+### ============================================================
+
+PATCH {{baseUrl}}/subjects/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Advanced Mathematics",
+  "shortName": "ADV MATH",
+  "description": "Updated Mathematics Subject",
+  "category": "STEM"
+}
+
+### ============================================================
+### Activate Subject
+### ============================================================
+
+PATCH {{baseUrl}}/subjects/1/activate
+Authorization: Bearer {{token}}
+
+### ============================================================
+### Deactivate Subject
+### ============================================================
+
+PATCH {{baseUrl}}/subjects/1/deactivate
+Authorization: Bearer {{token}}
+
+### ============================================================
+### Delete Subject
+### ============================================================
+
+DELETE {{baseUrl}}/subjects/2
+Authorization: Bearer {{token}}

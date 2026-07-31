@@ -1,0 +1,77 @@
+@host = http://localhost:3000
+
+####################################################
+# LOGIN
+####################################################
+
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@meritix.com",
+  "password": "Password123"
+}
+
+####################################################
+# Copy access_token below after login
+####################################################
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AbWVyaXRpeC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3ODU0MDcyNTAsImV4cCI6MTc4NTQ5MzY1MH0.FTRpkMfI9ikGeLXhJFueg3qKYfHj5zhZ3xySYrNt2RU
+
+####################################################
+# CREATE TOPIC
+####################################################
+
+POST {{host}}/topics
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "chapterId": 1,
+  "code": "ALG-001",
+  "name": "Linear Equations",
+  "description": "Introduction to Linear Equations",
+  "sequence": 1,
+  "isActive": true
+}
+
+####################################################
+# GET ALL TOPICS
+####################################################
+
+GET {{host}}/topics
+Authorization: Bearer {{token}}
+
+####################################################
+# GET TOPIC BY ID
+####################################################
+
+GET {{host}}/topics/1
+Authorization: Bearer {{token}}
+
+####################################################
+# GET TOPICS BY CHAPTER
+####################################################
+
+GET {{host}}/topics/chapter/1
+Authorization: Bearer {{token}}
+
+####################################################
+# UPDATE TOPIC
+####################################################
+
+PATCH {{host}}/topics/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Linear Equations Updated",
+  "sequence": 2
+}
+
+####################################################
+# DELETE TOPIC
+####################################################
+
+DELETE {{host}}/topics/1
+Authorization: Bearer {{token}}
